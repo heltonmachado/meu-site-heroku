@@ -10,21 +10,23 @@ app.use(express.json());
 
 // ROTA DE TESTE DA API
 app.get('/api/teste', (req, res) => {
-  res.json({ mensagem: "API funcionando no Heroku!" });
+  res.json({ mensagem: "API funcionando na Vercel!" });
 });
 
-// Se tiver mais rotas, crie uma pasta server/routes
+// SERVIR O REACT EM PRODUÇÃO
+app.use(express.static(path.join(__dirname, '../client/dist')));
 
-// --- SERVIR O REACT EM PRODUÇÃO (ESSENCIAL PARA HEROKU) ---
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/dist')));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist', 'index.html'));
+});
 
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/dist', 'index.html'));
+const PORT = process.env.PORT || 5000;
+
+// Só escuta a porta se não estiver na Vercel
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
   });
 }
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-});
+module.exports = app;
